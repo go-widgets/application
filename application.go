@@ -48,12 +48,29 @@ var runLoop = run
 // swallowed: a missing tray must not stop the window from running. The window
 // is the application; the tray is a convenience on top of it.
 func Run(s Spec, cfg Config, h Handler, onReady func()) error {
-	if s.Tray != nil {
-		t := tray.New(s.Icon).SetTooltip(s.Name).SetMenu(s.Tray())
-		// Attach joins the window's already-running loop; run it on its own
-		// goroutine (it may block) and stop it when the window returns.
-		go func() { _ = t.Attach() }()
-		defer t.Quit()
+	if s.Tray == nil {
+		return runLoop(cfg, h, onReady)
 	}
-	return runLoop(cfg, h, onReady)
+	t := tray.New(s.Icon).SetTooltip(s.Name).SetMenu(s.Tray())
+	defer t.Quit()
+	// Attach the tray from onReady, NOT before the loop starts: attaching joins
+	// the window's NSApplication and its running main loop, and BOTH must exist
+	// first — the window backend creates the NSApplication when it opens, and the
+	// loop begins pumping right after. onReady fires once the first frame is on
+	// screen, by when both are true; attaching earlier (a bare `go t.Attach()`
+	// ahead of runLoop) races the window's own AppKit setup and lands on nothing,
+	// which is why the status item never appeared. Attach may block until Quit,
+	// so it still runs on its own goroutine.
+	ready := func() {
+		go attachTray(t)
+		if onReady != nil {
+			onReady()
+		}
+	}
+	return runLoop(cfg, h, ready)
 }
+
+// attachTray joins the tray to the host's now-running loop. A package var so a
+// test can substitute it for the real [tray.Tray.Attach], which blocks until the
+// tray is torn down and does real AppKit work.
+var attachTray = func(t *tray.Tray) { _ = t.Attach() }

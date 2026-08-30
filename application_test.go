@@ -7,6 +7,7 @@ package application
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/go-widgets/toolkit"
 	"github.com/go-widgets/tray"
@@ -150,16 +151,22 @@ func TestRunWithoutTraySkipsTrayComposition(t *testing.T) {
 // harmless no-op — the branch under test is that the menu was BUILT and the loop
 // still ran, not that a real menu-bar icon appeared.
 func TestRunWithTrayBuildsTheMenu(t *testing.T) {
-	orig := runLoop
-	defer func() { runLoop = orig }()
+	origLoop, origAttach := runLoop, attachTray
+	defer func() { runLoop, attachTray = origLoop, origAttach }()
 
+	// The stub loop DRIVES onReady, standing in for the first frame going up, so
+	// the tray-attach-on-ready path (the fix for the tray never appearing) runs.
 	looped := false
 	runLoop = func(cfg Config, h Handler, onReady func()) error {
 		looped = true
+		onReady()
 		return errSentinel
 	}
+	attached := make(chan *tray.Tray, 1)
+	attachTray = func(tr *tray.Tray) { attached <- tr }
 
 	built := 0
+	consumerReady := false
 	spec := Spec{
 		Name: "With Tray",
 		Icon: []byte("PNGBYTES"),
@@ -168,14 +175,54 @@ func TestRunWithTrayBuildsTheMenu(t *testing.T) {
 			return tray.NewMenu()
 		},
 	}
-	err := Run(spec, Config{}, &recorder{}, nil)
+	err := Run(spec, Config{}, &recorder{}, func() { consumerReady = true })
 	if !errors.Is(err, errSentinel) {
 		t.Fatalf("Run returned %v, want the loop's error even with a tray", err)
 	}
 	if built != 1 {
 		t.Fatalf("the tray menu builder ran %d times, want exactly 1", built)
 	}
+	if !consumerReady {
+		t.Fatal("Run's onReady wrapper dropped the consumer's callback")
+	}
+	select {
+	case <-attached:
+	case <-time.After(2 * time.Second):
+		t.Fatal("the tray was never attached from onReady")
+	}
 	if !looped {
 		t.Fatal("Run built a tray but never drove the window loop")
 	}
+}
+
+// TestRunTrayAttachesWithoutConsumerOnReady covers the onReady==nil branch of the
+// ready wrapper: a tray app whose caller passes no onReady still attaches its
+// tray once the loop is up.
+func TestRunTrayAttachesWithoutConsumerOnReady(t *testing.T) {
+	origLoop, origAttach := runLoop, attachTray
+	defer func() { runLoop, attachTray = origLoop, origAttach }()
+
+	runLoop = func(_ Config, _ Handler, onReady func()) error {
+		onReady()
+		return errSentinel
+	}
+	attached := make(chan struct{}, 1)
+	attachTray = func(*tray.Tray) { attached <- struct{}{} }
+
+	err := Run(Spec{Name: "t", Tray: func() *tray.Menu { return tray.NewMenu() }}, Config{}, &recorder{}, nil)
+	if !errors.Is(err, errSentinel) {
+		t.Fatalf("Run returned %v, want the loop's error", err)
+	}
+	select {
+	case <-attached:
+	case <-time.After(2 * time.Second):
+		t.Fatal("the tray was never attached with a nil consumer onReady")
+	}
+}
+
+// TestAttachTrayDefaultIsHarmless exercises the real attachTray: with no native
+// backend linked on the test runner, Attach fails and the error is swallowed —
+// the point is that the default is callable and does not panic.
+func TestAttachTrayDefaultIsHarmless(t *testing.T) {
+	attachTray(tray.New(nil))
 }
