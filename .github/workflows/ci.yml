@@ -16,7 +16,7 @@ jobs:
     name: workflows parse
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # A workflow that fails to PARSE reports nothing at all: no jobs run, no
       # checks appear, and a pull request looks unexercised rather than broken.
       # Every other lane is downstream of the file itself being readable, so none
@@ -38,7 +38,7 @@ jobs:
     name: test (linux)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -84,7 +84,7 @@ jobs:
       matrix:
         goos: [linux, darwin, windows]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version: stable
