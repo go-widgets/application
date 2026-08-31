@@ -159,6 +159,27 @@ type Accessible interface {
 	A11yElements() []A11yElement
 }
 
+// NativeControlProvider is implemented by a Handler that wants some of what it
+// draws backed by real OS controls — a secure text field, a button, a slider —
+// embedded over its framebuffer. A back-end that can host native controls asks
+// for the descriptors each frame and reconciles the live controls to them; a
+// handler that does not implement this simply presents pixels, as before.
+//
+// It is a separate, optional interface, the exact parallel to [Accessible]:
+// where Accessible describes the surface for the platform's accessibility layer,
+// this describes the parts of it that should be real controls. The descriptor is
+// the toolkit's own [toolkit.NativeControl] — kind, key, geometry, value, and the
+// callbacks that carry the person's input back — because the back-end's seam
+// (toolkit.Surface.Controls) speaks exactly that.
+type NativeControlProvider interface {
+	// NativeControls returns the native controls to embed this frame, keyed for
+	// identity across frames, in the framebuffer's device-pixel, top-left space
+	// (like A11yElements and MouseDown). It is called once per frame from the
+	// back-end's main thread; a control the app is not showing this frame is
+	// simply omitted.
+	NativeControls() []toolkit.NativeControl
+}
+
 // Config controls the window.
 type Config struct {
 	Title         string
