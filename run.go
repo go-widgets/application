@@ -326,6 +326,12 @@ func bind(surf *toolkit.Surface, h Handler, scaleOf func() float64, ap *appearan
 	if a, ok := h.(Accessible); ok {
 		surf.Elements = func() []toolkit.SurfaceElement { return elements(a) }
 	}
+	// A handler that wants real OS controls over its pixels publishes them the
+	// same way it publishes accessibility; a back-end that can host native
+	// controls embeds and reconciles them, and one that cannot ignores the field.
+	if p, ok := h.(NativeControlProvider); ok {
+		surf.Controls = p.NativeControls
+	}
 	// A handler that can say which framebuffer rectangles changed lets the
 	// surface present incrementally: only those rectangles are re-blitted and
 	// re-presented instead of the whole window, which during a streaming load
