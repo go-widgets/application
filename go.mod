@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/go-widgets/toolkit v0.300.0
-	github.com/go-widgets/tray v0.7.2
+	github.com/go-widgets/tray v0.8.0
 	github.com/go-widgets/window v0.64.0
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/go-icons/iconoir v0.2.0 // indirect
 	github.com/go-images/images v0.0.0-20260830151046-7e8189dc2288 // indirect
 	github.com/go-macos/appkit v0.1.0 // indirect
-	github.com/go-macos/objc v0.7.0 // indirect
+	github.com/go-macos/objc v0.9.1 // indirect
 	github.com/go-mswin/win32 v0.4.0 // indirect
 	github.com/go-opentype/fonts v0.9.0 // indirect
 	github.com/go-opentype/opentype v0.12.0 // indirect
