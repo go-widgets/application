@@ -3,7 +3,7 @@ module github.com/go-widgets/application
 go 1.26.4
 
 require (
-	github.com/go-widgets/toolkit v0.314.0
+	github.com/go-widgets/toolkit v0.316.0
 	github.com/go-widgets/tray v0.10.0
 	github.com/go-widgets/window v0.73.0
 )
