@@ -4,7 +4,7 @@ go 1.26.4
 
 require (
 	github.com/go-widgets/toolkit v0.320.0
-	github.com/go-widgets/tray v0.11.0
+	github.com/go-widgets/tray v0.12.0
 	github.com/go-widgets/window v0.83.0
 )
 
