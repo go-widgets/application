@@ -3,18 +3,18 @@ module github.com/go-widgets/application
 go 1.26.4
 
 require (
-	github.com/go-widgets/toolkit v0.321.1
+	github.com/go-widgets/toolkit v0.321.2
 	github.com/go-widgets/tray v0.12.0
 	github.com/go-widgets/window v0.83.0
 )
 
 require (
 	github.com/ajroetker/go-highway v0.0.4 // indirect
-	github.com/andybalholm/brotli v1.2.4 // indirect
+	github.com/andybalholm/brotli v1.2.5 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/ebitengine/purego v0.11.1 // indirect
-	github.com/go-crdt/collab v0.71.0 // indirect
-	github.com/go-crdt/crdt v0.51.0 // indirect
+	github.com/go-crdt/collab v0.74.0 // indirect
+	github.com/go-crdt/crdt v0.55.0 // indirect
 	github.com/go-freedesktop/x11 v0.2.0 // indirect
 	github.com/go-gfx/gfx v0.34.0 // indirect
 	github.com/go-gtk/gtk4 v0.8.0 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/go-opentype/fonts v0.10.0 // indirect
 	github.com/go-opentype/opentype v0.13.0 // indirect
 	github.com/go-opentype/shape v0.5.0 // indirect
-	github.com/go-richdoc/richdoc v0.3.0 // indirect
+	github.com/go-richdoc/richdoc v0.4.0 // indirect
 	github.com/go-typeset/bidi v0.3.0 // indirect
 	github.com/go-widgets/android v0.13.1 // indirect
 	github.com/go-widgets/mvvm v0.9.0 // indirect
