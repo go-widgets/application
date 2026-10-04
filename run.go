@@ -361,6 +361,12 @@ func route(h Handler, ev toolkit.Event) {
 	}
 	switch ev.Kind {
 	case toolkit.EventClick:
+		// A handler that can take the modifiers gets them; one that cannot
+		// keeps the press it has always received.
+		if mc, ok := h.(ModifiedClicker); ok {
+			mc.ModifiedClick(ev.X, ev.Y, modifiersOf(ev))
+			return
+		}
 		h.MouseDown(ev.X, ev.Y)
 	case toolkit.EventSecondaryClick:
 		if sc, ok := h.(SecondaryClicker); ok {
@@ -389,6 +395,10 @@ func route(h Handler, ev toolkit.Event) {
 			}
 		}
 		if name := keyName(ev.Code); name != "" {
+			if mk, ok := h.(ModifiedKeyer); ok {
+				mk.ModifiedKey(name, modifiersOf(ev))
+				return
+			}
 			h.Key(name, 0)
 		}
 	case toolkit.EventChar:
@@ -397,6 +407,11 @@ func route(h Handler, ev toolkit.Event) {
 			return
 		}
 	}
+}
+
+// modifiersOf lifts an event's modifier flags into the handler's vocabulary.
+func modifiersOf(ev toolkit.Event) Modifiers {
+	return Modifiers{Ctrl: ev.Ctrl, Shift: ev.Shift, Alt: ev.Alt, Meta: ev.Meta}
 }
 
 // keyName translates the toolkit's DOM-style key names into the ones the app

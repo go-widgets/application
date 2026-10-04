@@ -62,6 +62,47 @@ type ShortcutSink interface {
 	Shortcut(r rune, ctrl, meta bool)
 }
 
+// Modifiers says which modifier keys were held when an input event happened.
+// Alt is the Option (⌥) / Alt key; Meta is Command (⌘) on macOS and the Super /
+// Windows key elsewhere.
+type Modifiers struct {
+	Ctrl, Shift, Alt, Meta bool
+}
+
+// ModifiedClicker is an optional [Handler] capability: a press arrives here
+// WITH the modifier keys that were held, instead of through [Handler.MouseDown],
+// which has no room to carry them.
+//
+// ⛔ Without it a handler cannot express a Shift-click or a ⌘-click to the
+// widget underneath, whatever that widget supports. Measured: go-widgets
+// toolkit's ListBox and Table both build a multi-row selection from Ctrl/⌘ and
+// Shift clicks, and an app on this contract could reach NONE of it -- it had
+// nothing to put in the event's Ctrl and Shift fields, so every click arrived
+// as a plain one and a multi-selection was unreachable with a mouse.
+//
+// A handler implementing it receives presses here and NOT through MouseDown;
+// Handler still requires MouseDown, so leave it as the plain-press path or have
+// one call the other.
+type ModifiedClicker interface {
+	ModifiedClick(x, y int, m Modifiers)
+}
+
+// ModifiedKeyer is an optional [Handler] capability: a key press arrives here
+// with the modifiers that were held, instead of through [Handler.Key], whose
+// contract says it has "no room to say which modifiers were held".
+//
+// ⛔ Shift is the one that matters and the one nothing else carried. A command
+// chord (Ctrl/⌘) already had a route -- [ShortcutSink], which keeps precedence
+// over this -- but a Shift-Arrow is not a command chord, so a handler could not
+// tell it from a plain Arrow. That is every "extend the selection with the
+// keyboard" gesture, unreachable.
+//
+// name is the same symbolic label Key receives, and a handler implementing this
+// receives key presses here and not through Key.
+type ModifiedKeyer interface {
+	ModifiedKey(name string, m Modifiers)
+}
+
 // SecondaryClicker is an optional [Handler] capability: a secondary (right /
 // two-finger / Control-click) press arrives here as the context-menu gesture,
 // with the same device-pixel coordinates as a MouseDown. A handler that has no
