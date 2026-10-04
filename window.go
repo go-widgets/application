@@ -15,10 +15,18 @@
 // launch-height seam and the ready-after-first-frame counter are all unit-tested.
 //
 // The optional capability interfaces (AppearanceSink, ShortcutSink,
-// SecondaryClicker, ContextMenuHost, ClipboardController, Accessible) are the
-// reason the run loop must never WRAP a Handler: a wrapper would satisfy the
-// bare Handler interface and silently drop every capability the concrete handler
-// also implements. Everything here threads the ORIGINAL handler through, and
+// ModifiedClicker, ModifiedKeyer, SecondaryClicker, ContextMenuHost,
+// ClipboardController, Accessible, NativeControlProvider) are the reason the run
+// loop must never WRAP a Handler: a wrapper would satisfy the bare Handler
+// interface and silently drop every capability the concrete handler also
+// implements.
+//
+// ⛔ That list is checked against the code, by
+// TestEveryCapabilityIsNamedInThePackageDoc: it walks the package for type
+// assertions off a Handler and insists the doc names each exported interface it
+// finds. It had drifted three capabilities behind before the check existed, and
+// a list that is wrong is worse than no list -- a reader counting six does not
+// go looking for a seventh. Everything here threads the ORIGINAL handler through, and
 // type-asserts for a capability at the point of use.
 package application
 

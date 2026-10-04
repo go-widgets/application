@@ -71,9 +71,21 @@ func main() {
 
 `handler` implements `application.Handler` (Frame / Resize / MouseDown / MouseMove
 / MouseUp / Scroll / Key). It may additionally implement any of the optional
-capability interfaces — `AppearanceSink`, `ShortcutSink`, `SecondaryClicker`,
-`ContextMenuHost`, `ClipboardController`, `Accessible` — and the run loop, which
-never wraps the handler, will honour each one it finds.
+capability interfaces — `AppearanceSink`, `ShortcutSink`, `ModifiedClicker`,
+`ModifiedKeyer`, `SecondaryClicker`, `ContextMenuHost`, `ClipboardController`,
+`Accessible`, `NativeControlProvider` — and the run loop, which never wraps the
+handler, will honour each one it finds.
+
+`Handler` has nowhere to put a modifier key: `MouseDown(x, y int)` carries no
+Shift, and `Key`'s own contract says it has *"no room to say which modifiers were
+held"*. `ModifiedClicker` and `ModifiedKeyer` are how a handler receives them, and
+without one a Shift-click or a Shift-arrow cannot reach the widget underneath
+whatever that widget supports.
+
+That list is checked against the code by
+`TestEveryCapabilityIsNamedInThePackageDoc`, which walks the package for type
+assertions off a `Handler` and insists both this file and the package doc name
+each one. It had drifted three capabilities behind before the check existed.
 
 For a non-window host (a desktop shell, wasmdesk, a tab in something larger),
 `Bind(handler, scale)` and `BindScaled(handler, scaleOf)` return a
