@@ -1,6 +1,6 @@
 module github.com/go-widgets/application
 
-go 1.26.4
+go 1.27.1
 
 require (
 	github.com/go-widgets/toolkit v0.321.2
