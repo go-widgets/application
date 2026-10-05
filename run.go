@@ -5,6 +5,7 @@
 package application
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/go-widgets/toolkit"
@@ -51,10 +52,22 @@ func launchHeight(cfgHeight int) int {
 // at the panel's real resolution (gw.NativeScale) rather than one pixel per
 // logical point. Without that the app would go visibly soft on a Retina display,
 // which is what it renders device-sized to avoid.
-func run(cfg Config, h Handler, onReady func()) error {
+//
+// quit, when non-nil, closes the window from outside: [Run] closes it when the
+// tray it was asked for cannot be attached, so that Run can say so.
+//
+// ⛔ The window is CLOSED when its loop returns (go-widgets/application#27).
+// A back-end's Run returns when the window is asked to close; on X11 and
+// Wayland that does not release the window, Close does. Without it a closed
+// window stayed on an X11 screen, frozen, with its connection open, until a
+// garbage collection happened to finalise it -- and an application that opens
+// a window again after the first one closed (a tray app's "Open") piled them up.
+// The toolkit clipboard Run installed from the window is put back the same way:
+// it would otherwise outlive the window it reads through.
+func run(cfg Config, h Handler, onReady func(), quit <-chan struct{}) error {
 	surf := toolkit.NewSurface(nil)
 
-	win, err := gw.Open(gw.Config{
+	win, err := openWindow(gw.Config{
 		Title:       cfg.Title,
 		Width:       int(cfg.Width),
 		Height:      launchHeight(int(cfg.Height)),
@@ -62,6 +75,20 @@ func run(cfg Config, h Handler, onReady func()) error {
 	})
 	if err != nil {
 		return err
+	}
+	defer closeAfterRun(win)
+	defer toolkit.SetClipboard(toolkit.CurrentClipboard())
+
+	if quit != nil {
+		ended := make(chan struct{})
+		defer close(ended)
+		go func() {
+			select {
+			case <-quit:
+				_ = win.Close()
+			case <-ended:
+			}
+		}()
 	}
 
 	// The handler is told the framebuffer size in RENDER pixels plus the scale,
@@ -136,6 +163,30 @@ func run(cfg Config, h Handler, onReady func()) error {
 
 	ap.start()
 	return win.Run(surf)
+}
+
+// openWindow is the seam the window is opened through: gw.Open in production,
+// a fake back-end in a test, which is what lets the lifecycle around the loop
+// -- the close when it returns, the clipboard put back -- be tested without a
+// display.
+var openWindow = gw.Open
+
+// closedByItsOwnLoop says the platform's window back-end has already closed the
+// window by the time its Run returns, so a Close afterwards must not be sent.
+//
+// That is Cocoa. Its Run returns only once -windowShouldClose: or a Close has
+// torn the window down, and Close is PERFORMED on the main thread rather than
+// done: sent after the loop has stopped, it waits in the run loop's queue and
+// is delivered to the next window's loop instead -- closing that window the
+// moment an application opens one again. Every other back-end leaves the
+// window to Close (X11, Wayland) or answers it as a no-op (Win32).
+var closedByItsOwnLoop = runtime.GOOS == "darwin"
+
+// closeAfterRun releases a window whose loop has returned; see run.
+func closeAfterRun(win gw.Backend) {
+	if !closedByItsOwnLoop {
+		_ = win.Close()
+	}
 }
 
 // heartbeatTicks is how many consecutive idle ticks the gated present loop lets

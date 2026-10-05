@@ -28,9 +28,20 @@ counter are all unit-tested to 100%.
 | windows  | win32 (`golang.org/x/sys/windows` syscalls)     | `Shell_NotifyIcon` + `TrackPopupMenu` |
 | linux    | X11 / Wayland (pure-Go wire protocols)          | `StatusNotifierItem` over DBus |
 
-The tray's native backends are opt-in via the `tray_native` build tag; without
-it the tray is a harmless no-op and the window still runs, so a headless build
-or a platform without native tray support degrades gracefully.
+The tray is **attached** to the window's own loop (`tray.Attach`) once the
+first frame is up. A tray that cannot be attached is `Run`'s error, not a
+silence: the window is closed and `Run` returns the attach error wrapped, so
+`errors.Is(err, tray.ErrNoBackend)` says why. That needs a tray release whose
+backend implements `Attach` on the platform: darwin always has; Linux and
+Windows do from the tray release carrying go-widgets/tray#36, and before it
+`Spec.Tray` there is now this error rather than no tray at all. An application that wants its window
+whatever happens to the tray leaves `Spec.Tray` nil and runs one itself.
+
+`Run` closes the window when its loop returns, and puts back the toolkit
+clipboard it installed from it, so an application can call `Run` again to open
+a fresh window -- a tray app's "Open" after the window was closed -- without the
+old one staying on screen. (On X11 a closed window used to stay mapped, frozen,
+until a garbage collection finalised its connection.)
 
 ## Usage
 
