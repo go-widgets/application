@@ -127,7 +127,7 @@ func TestRunWithoutTraySkipsTrayComposition(t *testing.T) {
 
 	var gotCfg Config
 	var gotReady bool
-	runLoop = func(cfg Config, h Handler, onReady func()) error {
+	runLoop = func(cfg Config, h Handler, onReady func(), _ <-chan struct{}) error {
 		gotCfg = cfg
 		gotReady = onReady != nil
 		return errSentinel
@@ -157,13 +157,13 @@ func TestRunWithTrayBuildsTheMenu(t *testing.T) {
 	// The stub loop DRIVES onReady, standing in for the first frame going up, so
 	// the tray-attach-on-ready path (the fix for the tray never appearing) runs.
 	looped := false
-	runLoop = func(cfg Config, h Handler, onReady func()) error {
+	runLoop = func(cfg Config, h Handler, onReady func(), _ <-chan struct{}) error {
 		looped = true
 		onReady()
 		return errSentinel
 	}
 	attached := make(chan *tray.Tray, 1)
-	attachTray = func(tr *tray.Tray) { attached <- tr }
+	attachTray = func(tr *tray.Tray) error { attached <- tr; return nil }
 
 	built := 0
 	consumerReady := false
@@ -202,12 +202,12 @@ func TestRunTrayAttachesWithoutConsumerOnReady(t *testing.T) {
 	origLoop, origAttach := runLoop, attachTray
 	defer func() { runLoop, attachTray = origLoop, origAttach }()
 
-	runLoop = func(_ Config, _ Handler, onReady func()) error {
+	runLoop = func(_ Config, _ Handler, onReady func(), _ <-chan struct{}) error {
 		onReady()
 		return errSentinel
 	}
 	attached := make(chan struct{}, 1)
-	attachTray = func(*tray.Tray) { attached <- struct{}{} }
+	attachTray = func(*tray.Tray) error { attached <- struct{}{}; return nil }
 
 	err := Run(Spec{Name: "t", Tray: func() *tray.Menu { return tray.NewMenu() }}, Config{}, &recorder{}, nil)
 	if !errors.Is(err, errSentinel) {
@@ -220,9 +220,10 @@ func TestRunTrayAttachesWithoutConsumerOnReady(t *testing.T) {
 	}
 }
 
-// TestAttachTrayDefaultIsHarmless exercises the real attachTray: with no native
-// backend linked on the test runner, Attach fails and the error is swallowed —
-// the point is that the default is callable and does not panic.
-func TestAttachTrayDefaultIsHarmless(t *testing.T) {
-	attachTray(tray.New(nil))
+// TestAttachTrayDefaultReportsAFailure exercises the real attachTray: a tray
+// whose backend cannot attach (the headless one) is reported, not swallowed.
+func TestAttachTrayDefaultReportsAFailure(t *testing.T) {
+	if err := attachTray(tray.New(nil).WithBackend(tray.NewHeadless())); !errors.Is(err, tray.ErrNoBackend) {
+		t.Fatalf("attachTray = %v, want tray.ErrNoBackend", err)
+	}
 }
