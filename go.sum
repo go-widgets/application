@@ -6,6 +6,8 @@ github.com/coder/websocket v1.8.15 h1:6B2JPeOGlpff2Uz6vOEH1Vzpi0iUz20A+lPVhPHtNU
 github.com/coder/websocket v1.8.15/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
 github.com/ebitengine/purego v0.11.1/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
+github.com/go-appdirs/outdir v0.2.0 h1:1TdK1U7d0kaHMIYp3BJkrVJwLxBJtxiDB1eOMTdi0As=
+github.com/go-appdirs/outdir v0.2.0/go.mod h1:A/F6uTrvD3bMiof2UXK5FUNemDN1tC7vOZxi8LdrhJs=
 github.com/go-crdt/collab v0.74.0 h1:Q+fv5M57UOGzgse9khZEYNCDPxY2kH4CHhEXqSV/6qc=
 github.com/go-crdt/collab v0.74.0/go.mod h1:o1aOUE4PI5EfvNPzetDO/cgoGStcuCQueoPaFTf4LiU=
 github.com/go-crdt/crdt v0.55.0 h1:D/LHQ4OgSJRomMvEeYzRwwnP0hnXGngWevXglmpXIxI=
@@ -52,12 +54,12 @@ github.com/go-widgets/mvvm v0.9.0 h1:NwW/hAAsJUGlxmNt0ErQ7fUrud3w5Ys1RWm7hVugdJs
 github.com/go-widgets/mvvm v0.9.0/go.mod h1:1cUYVpDei59Ka7W3pMD1FWksBmBXfPnbPWHzBAJ/ebA=
 github.com/go-widgets/painter v0.13.0 h1:xBPbopFuYfeDVbQKUKviU6HnP2mAhztJ+BpasahlJLU=
 github.com/go-widgets/painter v0.13.0/go.mod h1:IPRLqdUJuJX8sfuHeYLZCzjoLvA0ApbOlyIAVmguJDQ=
-github.com/go-widgets/toolkit v0.321.2 h1:l36f1g9rrxEy/4OgM82V/uNLQxB1hDNAU5nrc91okno=
-github.com/go-widgets/toolkit v0.321.2/go.mod h1:9nubMil78K/7phDy5hNMPFZn6z0bycqYchip020sFLs=
+github.com/go-widgets/toolkit v0.326.0 h1:F7otUDG1p9VaQXpgca9k2fQNSsAjqLjDGU/zAcKDm3Y=
+github.com/go-widgets/toolkit v0.326.0/go.mod h1:IfzBIAPNK6m9FGsEGgaEefyx8DZ1441HYP1WK8n74pM=
 github.com/go-widgets/tray v0.14.0 h1:gBzCgwL82qU9S1ka2nojjIDsDfay9Tl9tt13RSDXaSc=
 github.com/go-widgets/tray v0.14.0/go.mod h1:jjPL6hhz9NmSJxD1tSeaoto0fMJshi4ObwUr5mA1pxU=
-github.com/go-widgets/window v0.83.0 h1:62VMsPIdXcodtvVirNtwfd29UngiDOUvksx7H7/fGQw=
-github.com/go-widgets/window v0.83.0/go.mod h1:yi3QpijGIlZhdsa6/fSHcnJ9jmxn+NgxFDHPNDZyFPg=
+github.com/go-widgets/window v0.86.1 h1:TrpCYKekftOS9HpbBHEMNQZA+4sA7HU5K2V0HPwcwAQ=
+github.com/go-widgets/window v0.86.1/go.mod h1:oz+1kfIyJxOOX+7SQ3HH00BblUpLsRXmEv85VxywwL0=
 github.com/godbus/dbus/v5 v5.2.2 h1:TUR3TgtSVDmjiXOgAAyaZbYmIeP3DPkld3jgKGV8mXQ=
 github.com/godbus/dbus/v5 v5.2.2/go.mod h1:3AAv2+hPq5rdnr5txxxRwiGjPXamgoIHgz9FPBfOp3c=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=

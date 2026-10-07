@@ -3,9 +3,9 @@ module github.com/go-widgets/application
 go 1.27.1
 
 require (
-	github.com/go-widgets/toolkit v0.321.2
+	github.com/go-widgets/toolkit v0.326.0
 	github.com/go-widgets/tray v0.14.0
-	github.com/go-widgets/window v0.83.0
+	github.com/go-widgets/window v0.86.1
 )
 
 require (
