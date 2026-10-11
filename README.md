@@ -28,7 +28,7 @@ counter are all unit-tested to 100%.
 | windows  | win32 (`golang.org/x/sys/windows` syscalls)     | `Shell_NotifyIcon` + `TrackPopupMenu` |
 | linux    | X11 / Wayland (pure-Go wire protocols)          | `StatusNotifierItem` over DBus |
 
-The tray is **attached** to the window's own loop (`tray.Attach`) once the
+The tray is **attached** to the window's own loop (`Tray.Attach`) once the
 first frame is up. A tray that cannot be attached is `Run`'s error, not a
 silence: the window is closed and `Run` returns the attach error wrapped, so
 `errors.Is(err, tray.ErrNoBackend)` says why. That needs a tray release whose
