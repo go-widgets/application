@@ -87,6 +87,27 @@ capability interfaces — `AppearanceSink`, `ShortcutSink`, `ModifiedClicker`,
 `Accessible`, `NativeControlProvider` — and the run loop, which never wraps the
 handler, will honour each one it finds.
 
+## Accessibility of painted widgets
+
+A handler that paints its own go-widgets widgets is, to a screen reader, one
+unlabelled rectangle: its painted buttons are not in the macOS AX tree, the
+AT-SPI tree or the UIA tree until it says they exist. It does so by implementing
+`Accessible`, and `A11yElementsOf` builds the answer from the widget tree it
+paints:
+
+```go
+func (v *View) A11yElements() []application.A11yElement {
+	return application.A11yElementsOf(v.root) // role, label, value, bounds
+}
+```
+
+Each element carries the role, label and value its widget reports, at the
+widget's bounds (device pixels). The back-end maps them to its platform
+(`NSAccessibilityElement`, AT-SPI, UIA), publishes only when the description
+changed, and turns a platform "press" into a click at the element's centre
+through the handler's own `MouseDown`/`MouseUp`. The result is capped at
+`MaxA11yElements` (1000). Widgets with no `A11y` method contribute nothing.
+
 `Handler` has nowhere to put a modifier key: `MouseDown(x, y int)` carries no
 Shift, and `Key`'s own contract says it has *"no room to say which modifiers were
 held"*. `ModifiedClicker` and `ModifiedKeyer` are how a handler receives them, and
