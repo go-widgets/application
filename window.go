@@ -233,4 +233,12 @@ type NativeControlProvider interface {
 type Config struct {
 	Title         string
 	Width, Height float64
+
+	// HideOnClose makes the window's own close control hide the window instead of
+	// ending [Run]: the application keeps running (in its tray) and quits only
+	// through an explicit quit -- the tray's Quit item, or the process being told
+	// to. [Raise] or [Show] brings the window back. A back-end that cannot hide
+	// on close (GTK, Android, wasm) makes Run return [ErrNotSupported] rather than
+	// open a window that quits when the user was promised it would not.
+	HideOnClose bool
 }

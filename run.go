@@ -72,11 +72,16 @@ func run(cfg Config, h Handler, onReady func(), quit <-chan struct{}) error {
 		Width:       int(cfg.Width),
 		Height:      launchHeight(int(cfg.Height)),
 		RenderScale: gw.NativeScale,
+		HideOnClose: cfg.HideOnClose,
 	})
 	if err != nil {
 		return err
 	}
 	defer closeAfterRun(win)
+	// Cleared BEFORE the window is released (defers run last-in first-out), so a
+	// Raise racing the end of Run answers ErrNoWindow, never a closed window.
+	setCurrent(win)
+	defer setCurrent(nil)
 	defer toolkit.SetClipboard(toolkit.CurrentClipboard())
 
 	if quit != nil {
