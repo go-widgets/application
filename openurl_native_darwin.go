@@ -13,13 +13,16 @@ var openURLLoad struct {
 	err  error
 }
 
+// loadAppKit is a variable so a test can make the framework load fail.
+var loadAppKit = func() error { return objc.Load(objc.AppKit, objc.Foundation) }
+
 // openURLNative opens u with [NSWorkspace openURL:], the call LaunchServices
 // serves, through the same purego Objective-C bridge the window and tray use.
 // No `open` child process is started, so it works from a sandboxed or
 // PATH-less launch and cannot be steered by argument parsing.
 func openURLNative(u string) error {
 	openURLLoad.once.Do(func() {
-		if err := objc.Load(objc.AppKit, objc.Foundation); err != nil {
+		if err := loadAppKit(); err != nil {
 			openURLLoad.err = fmt.Errorf("application: loading AppKit: %w", err)
 		}
 	})
