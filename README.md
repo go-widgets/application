@@ -123,6 +123,36 @@ For a non-window host (a desktop shell, wasmdesk, a tab in something larger),
 `Bind(handler, scale)` and `BindScaled(handler, scaleOf)` return a
 `*toolkit.Surface` wired to the same handler without opening a window.
 
+## A tray application: `Raise`, `Show`, `Hide` and `Config.HideOnClose`
+
+A tray app's "Open" item must bring back the window that is already there, and
+closing the window must not quit the app. Both are in the package:
+
+```go
+application.Run(spec, application.Config{Title: "App", Width: 480, Height: 640, HideOnClose: true}, h, nil)
+
+// in the tray's "Open" callback, on any goroutine:
+if err := application.Raise(); err != nil { /* ErrNoWindow, ErrNotSupported */ }
+```
+
+- `Raise()` shows the window if hidden, restores it if minimised, brings it to the
+  front and asks for the focus. `Show()` only makes it visible; `Hide()` takes it
+  off the screen without closing it (`Run` keeps running, the handler keeps its
+  state).
+- `Config.HideOnClose` makes the window's own close control hide it instead of
+  ending `Run`; the app then quits through its tray's Quit.
+- Never a silent no-op: `ErrNoWindow` (before `Run` opened a window or after it
+  returned; wraps `window.ErrClosed`) and `ErrNotSupported` (the window package's
+  own error) say what could not be done.
+
+| back-end | Raise / Show / Hide | HideOnClose |
+|---|---|---|
+| macOS (Cocoa) | yes | yes |
+| Windows (Win32) | yes | yes |
+| X11 | yes | yes |
+| Wayland | Show, Hide; Raise is `ErrNotSupported` (no xdg request) | yes |
+| GTK, Android, wasm | `ErrNotSupported` | `Run` returns `ErrNotSupported` |
+
 ## Opening a URL in the browser: `OpenURL`
 
 ```go
