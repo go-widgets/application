@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -84,10 +85,26 @@ func TestCheckURLRefusesMalformed(t *testing.T) {
 		" https://example.com",
 		"https://example.com/" + strings.Repeat("a", maxURLLength),
 	} {
-		if _, err := checkURL(in); !errors.Is(err, ErrURLInvalid) {
+		var err error
+		noPanic(t, "checkURL("+strconv.Quote(in[:min(len(in), 40)])+")", func() { _, err = checkURL(in) })
+		if !errors.Is(err, ErrURLInvalid) {
 			t.Errorf("checkURL(%.40q) = %v, want ErrURLInvalid", in, err)
 		}
 	}
+}
+
+// noPanic runs f and reports a panic as a failed assertion. Without the
+// url.Parse error check, a URL that does not parse reaches a nil pointer; that
+// must fail the test that covers it, not kill the test binary and hide the
+// tests after it.
+func noPanic(t *testing.T, what string, f func()) {
+	t.Helper()
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("%s panicked: %v", what, r)
+		}
+	}()
+	f()
 }
 
 func TestOpenURLPassesTheCanonicalFormOnly(t *testing.T) {
