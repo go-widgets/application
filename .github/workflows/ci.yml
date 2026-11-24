@@ -61,10 +61,13 @@ jobs:
         # launch-verified boundary in-process tests do not reach — excluded the
         # way the reader excludes its whole window package. EVERYTHING ELSE must
         # be 100%, enforced here so drift cannot creep in behind the exclusion.
+        # The same goes for the real OS calls of OpenURL (openurl_native_*.go: the
+        # portal D-Bus call and xdg-open): the logic around them is covered, the
+        # calls themselves need a desktop.
         run: |
           CGO_ENABLED=0 go test -covermode=set -coverprofile=cover.out ./...
           under=$(go tool cover -func=cover.out \
-            | grep -vE '/run\.go:[0-9]+:[[:space:]]+run[[:space:]]' \
+            | grep -vE '/run\.go:[0-9]+:[[:space:]]+run[[:space:]]|/openurl_native_[a-z]+\.go:' \
             | grep -v '^total:' \
             | grep -v '100.0%' || true)
           if [ -n "$under" ]; then
@@ -94,6 +97,8 @@ jobs:
           - { goos: darwin, goarch: amd64 }
           - { goos: windows, goarch: amd64 }
           - { goos: windows, goarch: arm64 }
+          # No native OpenURL: compiles the ErrOpenURLUnsupported fallback.
+          - { goos: freebsd, goarch: amd64 }
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7

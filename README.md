@@ -102,6 +102,37 @@ For a non-window host (a desktop shell, wasmdesk, a tab in something larger),
 `Bind(handler, scale)` and `BindScaled(handler, scaleOf)` return a
 `*toolkit.Surface` wired to the same handler without opening a window.
 
+## Opening a URL in the browser: `OpenURL`
+
+```go
+if err := application.OpenURL("https://example.com/oauth/authorize?..."); err != nil {
+	// errors.Is(err, application.ErrURLScheme / ErrURLInvalid / ErrOpenURLUnsupported)
+}
+```
+
+`OpenURL(rawURL string) error` opens the URL in the user's default browser and
+returns once the OS has accepted the request (it does not wait for the browser).
+It is what an OAuth sign-in needs.
+
+Only absolute `http` and `https` URLs with a host (and a port within 1-65535, if
+any) are accepted, up to 8 KiB. Anything else is refused before the OS sees it:
+`ErrURLScheme` for a `file:`, `smb:`, UNC, `javascript:` or custom-scheme URL (the
+URLs an app opens often come from a server's document, and those would launch a
+local file or a registered handler), `ErrURLInvalid` for a malformed one. The URL
+is re-serialised from its parse, so what was checked is what is opened.
+
+| OS | Mechanism |
+|---|---|
+| macOS | `NSWorkspace openURL:` through the objc bridge (no `open` process) |
+| Windows | `ShellExecuteW`, verb `open` |
+| Linux | the `org.freedesktop.portal.OpenURI` portal over D-Bus (works from a sandbox), falling back to `xdg-open` |
+| other | `ErrOpenURLUnsupported` |
+
+The URL check and the Linux chain are covered by tests (the portal call against a
+fake portal on a real session bus); the real OS calls need a desktop and are the
+launch-verified boundary, like the window loop. `OPENURL_LIVE=<url> go test -run
+TestOpenURLLive .` opens one real browser tab to prove it on the machine at hand.
+
 ## License
 
 BSD-3-Clause. See [LICENSE](LICENSE).
