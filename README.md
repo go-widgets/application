@@ -97,7 +97,7 @@ paints:
 
 ```go
 func (v *View) A11yElements() []application.A11yElement {
-	return application.A11yElementsOf(v.root) // role, label, value, bounds
+	return application.A11yElementsOf(v.root) // role, label, value, bounds, disabled
 }
 ```
 
@@ -107,6 +107,11 @@ widget's bounds (device pixels). The back-end maps them to its platform
 changed, and turns a platform "press" into a click at the element's centre
 through the handler's own `MouseDown`/`MouseUp`. The result is capped at
 `MaxA11yElements` (1000). Widgets with no `A11y` method contribute nothing.
+
+A disabled widget (`A11yElement.Disabled`) is published as such: macOS
+`AXEnabled` false, UI Automation `IsEnabled` false, AT-SPI without
+ENABLED/SENSITIVE, so a screen reader announces it as unavailable instead of
+offering to press it.
 
 `Handler` has nowhere to put a modifier key: `MouseDown(x, y int)` carries no
 Shift, and `Key`'s own contract says it has *"no room to say which modifiers were

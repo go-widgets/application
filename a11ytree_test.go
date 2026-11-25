@@ -40,6 +40,24 @@ func TestA11yElementsOfReportsAPaintedButton(t *testing.T) {
 	}
 }
 
+func TestA11yElementsOfReportsADisabledButton(t *testing.T) {
+	b := toolkit.NewButton("Connect", func() {})
+	b.Disabled().Set(true)
+	box := toolkit.NewVBox()
+	box.AddFixed(b, 40)
+	box.SetBounds(toolkit.Rect{X: 0, Y: 0, W: 200, H: 40})
+
+	for _, e := range A11yElementsOf(box) {
+		if e.Name == "Connect" {
+			if !e.Disabled {
+				t.Fatalf("disabled button reported enabled: %+v", e)
+			}
+			return
+		}
+	}
+	t.Fatal("no Connect element")
+}
+
 func TestA11yElementsOfIsBounded(t *testing.T) {
 	box := toolkit.NewVBox()
 	for i := 0; i < MaxA11yElements+50; i++ {

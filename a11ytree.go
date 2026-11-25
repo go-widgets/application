@@ -53,10 +53,11 @@ func A11yElementsOf(root toolkit.Widget) []A11yElement {
 	out := make([]A11yElement, 0, len(nodes))
 	for _, n := range nodes {
 		out = append(out, A11yElement{
-			Role:  string(n.Role),
-			Name:  n.Name,
-			Value: n.Value,
-			X:     n.Rect.X, Y: n.Rect.Y, W: n.Rect.W, H: n.Rect.H,
+			Role:     string(n.Role),
+			Name:     n.Name,
+			Value:    n.Value,
+			Disabled: n.Disabled,
+			X:        n.Rect.X, Y: n.Rect.Y, W: n.Rect.W, H: n.Rect.H,
 		})
 	}
 	return out

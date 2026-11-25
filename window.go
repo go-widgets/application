@@ -191,6 +191,11 @@ type A11yElement struct {
 	Name       string
 	Value      string
 	X, Y, W, H int
+	// Disabled marks an element that is shown but cannot be operated. Each
+	// back-end publishes it in its platform's own terms (macOS AXEnabled, UI
+	// Automation IsEnabled, AT-SPI ENABLED/SENSITIVE), so a screen reader
+	// announces it as unavailable instead of offering to press it.
+	Disabled bool
 }
 
 // Accessible is implemented by a Handler that can describe what it is showing.

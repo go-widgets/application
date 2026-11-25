@@ -181,11 +181,14 @@ func (p *plainHandler) Key(string, rune)                { p.keys++ }
 
 func TestElementsMapIntoTheToolkitShape(t *testing.T) {
 	r := &recorder{elements: []A11yElement{
-		{Role: "button", Name: "Refresh", Value: "v", X: 1, Y: 2, W: 3, H: 4},
+		{Role: "button", Name: "Refresh", Value: "v", X: 1, Y: 2, W: 3, H: 4, Disabled: true},
 	}}
 	got := elements(r)
 	if len(got) != 1 {
 		t.Fatalf("mapped %d elements, want 1", len(got))
+	}
+	if !got[0].Disabled {
+		t.Errorf("element = %+v, want Disabled carried over", got[0])
 	}
 	if got[0].Role != toolkit.Role("button") || got[0].Name != "Refresh" || got[0].Value != "v" {
 		t.Errorf("element = %+v, want the role, name and value carried over", got[0])
