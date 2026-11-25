@@ -174,6 +174,34 @@ err := application.OpenFile(application.OpenOptions{
 - Paths come back as the platform gives them, never resolved or followed.
 - Native on macOS (NSOpenPanel, NSSavePanel, NSAlert), GTK 4.10+ (GtkFileDialog, GtkAlertDialog) and Windows (IFileDialog, TaskDialog).
 
+## The menu bar: `Config.Menu` and `SetMenu`
+
+```go
+cfg := application.Config{
+	Title: "Notes",
+	Menu: tray.NewMenu().Add(
+		tray.SubMenu("File", tray.NewMenu().Add(
+			tray.KeyItem("Save", nil, "s", tray.ModCommand, save),
+		)),
+		tray.EditMenu(), // Undo, Redo, Cut, Copy, Paste, Select All
+	),
+}
+err := application.Run(spec, cfg, handler, nil)
+```
+
+The menu is the `go-widgets/tray` model (labels, key equivalents, checkmarks,
+separators, submenus, handlers), the same one a tray icon uses.
+`application.SetMenu(m)` changes it at any time, from any goroutine, before or
+while the application runs; the platform menu is rebuilt only when
+`Menu.Signature()` changed.
+
+- macOS: the menu bar at the top of the screen, with the standard application
+  menu (About, Hide, Quit) first, named after `Config.Title`. Without
+  `tray.EditMenu()` copy and paste do not work in native text fields.
+- Windows: the window's menu bar; key equivalents are shown as `Ctrl+S`.
+- X11, Wayland, GTK, wasm, Android: no menu bar. `SetMenu` answers
+  `ErrNotSupported` and `Run` carries on without one.
+
 ## Opening a URL in the browser: `OpenURL`
 
 ```go

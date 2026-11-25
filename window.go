@@ -35,6 +35,7 @@ import (
 	"image/color"
 
 	"github.com/go-widgets/toolkit"
+	"github.com/go-widgets/tray"
 )
 
 // ErrUnsupported is returned by [Run] on a platform without a native back-end.
@@ -246,4 +247,9 @@ type Config struct {
 	// on close (GTK, Android, wasm) makes Run return [ErrNotSupported] rather than
 	// open a window that quits when the user was promised it would not.
 	HideOnClose bool
+
+	// Menu is the application's menu bar, in the same model a tray icon's menu
+	// uses; see [SetMenu] for the platforms and for changing it later. Nil leaves
+	// the platform's default (on macOS, the bare application menu).
+	Menu *tray.Menu
 }
