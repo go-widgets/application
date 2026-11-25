@@ -158,6 +158,22 @@ if err := application.Raise(); err != nil { /* ErrNoWindow, ErrNotSupported */ }
 | Wayland | Show, Hide; Raise is `ErrNotSupported` (no xdg request) | yes |
 | GTK, Android, wasm | `ErrNotSupported` | `Run` returns `ErrNotSupported` |
 
+## Native dialogs: `OpenFile`, `SaveFile`, `Alert`, `Confirm`
+
+```go
+err := application.OpenFile(application.OpenOptions{
+    Title: "Open", Multiple: true,
+    Filters: []application.Filter{{Name: "Images", Extensions: []string{"png", "jpg"}}},
+}, func(r application.OpenResult) { /* r.Paths, or r.Err == ErrCancelled */ })
+// SaveFile(SaveOptions{Name: "report.txt"}, func(SaveResult)), Alert(AlertOptions{...}, func(AlertResult)),
+// Confirm(message, detail, yes, no, func(yes bool, err error))
+```
+
+- Asynchronous and safe from any goroutine: the call returns at once, and the callback runs exactly once on its own goroutine (never the UI thread). When the call itself returns an error, the callback is never called.
+- Errors: `ErrNoWindow` before `Run` has opened the window, `ErrNotSupported` on a back-end without native dialogs (X11, Wayland, wasm), `ErrInvalidDialog` for an input that is out of bounds, holds a NUL byte or is not UTF-8 (limits: `MaxFilters`, `MaxExtensions`, `MaxButtons`, `MaxStringLen`, `MaxMessageLen`), and `ErrCancelled` in a result when the user dismissed the dialog.
+- Paths come back as the platform gives them, never resolved or followed.
+- Native on macOS (NSOpenPanel, NSSavePanel, NSAlert), GTK 4.10+ (GtkFileDialog, GtkAlertDialog) and Windows (IFileDialog, TaskDialog).
+
 ## Opening a URL in the browser: `OpenURL`
 
 ```go
