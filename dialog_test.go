@@ -90,6 +90,14 @@ func TestDialogsReachTheWindowAndReturnItsAnswer(t *testing.T) {
 		t.Errorf("SaveFile result = %+v", r)
 	}
 
+	al := make(chan AlertResult, 1)
+	if err := Alert(AlertOptions{Message: "m", Buttons: []string{"A", "B"}}, func(r AlertResult) { al <- r }); err != nil {
+		t.Fatal(err)
+	}
+	if r := <-al; r.Err != nil || r.Button != 1 {
+		t.Errorf("Alert result = %+v", r)
+	}
+
 	cf := make(chan bool, 1)
 	if err := Confirm("sure?", "", "Yes", "No", func(yes bool, err error) { cf <- yes && err == nil }); err != nil {
 		t.Fatal(err)
@@ -97,7 +105,7 @@ func TestDialogsReachTheWindowAndReturnItsAnswer(t *testing.T) {
 	if <-cf { // the fake presses button 1, "No"
 		t.Error("Confirm reported yes for button 1")
 	}
-	if len(w.alrt) != 1 || len(w.alrt[0].Buttons) != 2 || w.alrt[0].Buttons[0] != "Yes" {
+	if len(w.alrt) != 2 || len(w.alrt[1].Buttons) != 2 || w.alrt[1].Buttons[0] != "Yes" {
 		t.Errorf("window got %+v", w.alrt)
 	}
 }
