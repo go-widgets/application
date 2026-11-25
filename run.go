@@ -524,10 +524,11 @@ func elements(a Accessible) []toolkit.SurfaceElement {
 	out := make([]toolkit.SurfaceElement, 0, len(src))
 	for _, e := range src {
 		out = append(out, toolkit.SurfaceElement{
-			Role:  toolkit.Role(e.Role),
-			Name:  e.Name,
-			Value: e.Value,
-			X:     e.X, Y: e.Y, W: e.W, H: e.H,
+			Role:     toolkit.Role(e.Role),
+			Name:     e.Name,
+			Value:    e.Value,
+			Disabled: e.Disabled,
+			X:        e.X, Y: e.Y, W: e.W, H: e.H,
 		})
 	}
 	return out
