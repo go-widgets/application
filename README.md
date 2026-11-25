@@ -199,7 +199,9 @@ while the application runs; the platform menu is rebuilt only when
   menu (About, Hide, Quit) first, named after `Config.Title`. Without
   `tray.EditMenu()` copy and paste do not work in native text fields.
 - Windows: the window's menu bar; key equivalents are shown as `Ctrl+S`.
-- X11, Wayland, GTK, wasm, Android: no menu bar. `SetMenu` answers
+- GTK 4: a `GtkPopoverMenuBar` above the window's content; key equivalents
+  are window-wide shortcuts that take precedence over the content.
+- X11, Wayland, wasm, Android: no menu bar. `SetMenu` answers
   `ErrNotSupported` and `Run` carries on without one.
 
 ## Opening a URL in the browser: `OpenURL`
