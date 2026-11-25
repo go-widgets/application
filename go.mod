@@ -3,12 +3,12 @@ module github.com/go-widgets/application
 go 1.27.4
 
 require (
-	github.com/go-macos/objc v0.12.0
+	github.com/go-macos/objc v0.13.0
 	github.com/go-widgets/toolkit v0.400.0
-	github.com/go-widgets/tray v0.15.0
-	github.com/go-widgets/window v0.104.0
+	github.com/go-widgets/tray v0.17.0
+	github.com/go-widgets/window v0.105.0
 	github.com/godbus/dbus/v5 v5.2.4
-	golang.org/x/sys v0.49.0
+	golang.org/x/sys v0.50.0
 )
 
 require (
@@ -21,10 +21,10 @@ require (
 	github.com/go-gfx/vulkan v0.2.1 // indirect
 	github.com/go-gtk/gtk4 v0.14.0 // indirect
 	github.com/go-images/images v0.3.0 // indirect
-	github.com/go-macos/appkit v0.9.0 // indirect
+	github.com/go-macos/appkit v0.10.0 // indirect
 	github.com/go-macos/metal v0.6.0 // indirect
 	github.com/go-mswin/d3d11 v0.3.0 // indirect
-	github.com/go-mswin/win32 v0.6.0 // indirect
+	github.com/go-mswin/win32 v0.7.0 // indirect
 	github.com/go-opentype/fonts v0.14.0 // indirect
 	github.com/go-opentype/opentype v0.20.0 // indirect
 	github.com/go-opentype/shape v0.7.0 // indirect

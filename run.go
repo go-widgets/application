@@ -82,6 +82,7 @@ func run(cfg Config, h Handler, onReady func(), quit <-chan struct{}) error {
 	// Raise racing the end of Run answers ErrNoWindow, never a closed window.
 	setCurrent(win)
 	defer setCurrent(nil)
+	defer attachMenu(win, cfg)()
 	defer toolkit.SetClipboard(toolkit.CurrentClipboard())
 
 	if quit != nil {
