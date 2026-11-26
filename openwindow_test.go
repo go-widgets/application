@@ -22,6 +22,8 @@ type childParent struct {
 	onClose func()
 	err     error
 	child   *fakeChild
+	scaled  bool
+	scale   float64
 }
 
 func (p *childParent) OpenChild(cfg gw.Config, root toolkit.Widget, onClose func()) (gw.Child, error) {
@@ -30,6 +32,9 @@ func (p *childParent) OpenChild(cfg gw.Config, root toolkit.Widget, onClose func
 	}
 	p.cfg, p.root, p.onClose = cfg, root, onClose
 	p.child = &fakeChild{onClose: onClose}
+	if p.scaled {
+		return scaledChild{p.child, p.scale}, nil
+	}
 	return p.child, nil
 }
 
@@ -159,6 +164,60 @@ func TestWindowsClockRunsUntilItCloses(t *testing.T) {
 	if p.child.painted() != n {
 		t.Fatal("the clock kept running after the window closed")
 	}
+}
+
+// scaledChild is a child window that reports a render scale.
+type scaledChild struct {
+	*fakeChild
+	s float64
+}
+
+func (c scaledChild) RenderScale() float64 { return c.s }
+
+// scaleSeen opens a window whose child reports s (or no scale at all when
+// scaled is false), runs one frame and returns the scale the handler was told.
+func scaleSeen(t *testing.T, scaled bool, s float64) float64 {
+	t.Helper()
+	p := &childParent{fakeWindow: newFakeWindow(true), scaled: scaled, scale: s}
+	withCurrent(t, p)
+	h := &resizeHandler{}
+	w, err := OpenWindow(WindowConfig{}, h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Close()
+	p.root.(*toolkit.Surface).Frame()
+	return h.scale
+}
+
+type resizeHandler struct {
+	plainHandler
+	scale float64
+}
+
+func (h *resizeHandler) Resize(w, hh int, scale float64) { h.scale = scale }
+
+func TestWindowScaleComesFromItsChild(t *testing.T) {
+	if got := scaleSeen(t, true, 3); got != 3 {
+		t.Fatalf("scale = %v, want the child's 3", got)
+	}
+	if got := scaleSeen(t, true, 0); got != 1 {
+		t.Fatalf("scale = %v, want 1 for a child reporting 0", got)
+	}
+	if got := scaleSeen(t, false, 0); got != 1 {
+		t.Fatalf("scale = %v, want 1 for a child without a scale", got)
+	}
+}
+
+func TestASecondGoodbyeDoesNotPanic(t *testing.T) {
+	w := &Window{stop: make(chan struct{})}
+	w.closed()
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("a second goodbye panicked: %v", r)
+		}
+	}()
+	w.closed()
 }
 
 func TestWindowCloseBeforeTheChildExists(t *testing.T) {
