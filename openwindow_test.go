@@ -131,10 +131,6 @@ func TestWindowCloseRaiseAndOnClose(t *testing.T) {
 	if err := w.Raise(); !errors.Is(err, ErrNoWindow) {
 		t.Fatalf("Raise after close = %v, want ErrNoWindow", err)
 	}
-	w.closed()
-	if calls != 1 {
-		t.Fatalf("a second goodbye called OnClose again (%d)", calls)
-	}
 	late := 0
 	w.OnClose(func() { late++ })
 	if late != 1 {
@@ -211,10 +207,15 @@ func TestWindowScaleComesFromItsChild(t *testing.T) {
 
 func TestASecondGoodbyeDoesNotPanic(t *testing.T) {
 	w := &Window{stop: make(chan struct{})}
+	calls := 0
+	w.OnClose(func() { calls++ })
 	w.closed()
 	defer func() {
 		if r := recover(); r != nil {
 			t.Fatalf("a second goodbye panicked: %v", r)
+		}
+		if calls != 1 {
+			t.Fatalf("a second goodbye called OnClose again (%d)", calls)
 		}
 	}()
 	w.closed()
