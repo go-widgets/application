@@ -158,6 +158,28 @@ if err := application.Raise(); err != nil { /* ErrNoWindow, ErrNotSupported */ }
 | Wayland | Show, Hide; Raise is `ErrNotSupported` (no xdg request) | yes |
 | GTK, Android, wasm | `ErrNotSupported` | `Run` returns `ErrNotSupported` |
 
+## A second window: `OpenWindow`
+
+```go
+// In a handler callback (the "+" button's), on the UI thread:
+w, err := application.OpenWindow(application.WindowConfig{Title: "Add server", Width: 420, Height: 260}, formHandler)
+if err != nil { /* ErrNoWindow, ErrNotSupported */ }
+w.OnClose(func() { /* the user closed it, or w.Close() did */ })
+// later, from any goroutine:
+w.Raise()
+w.Close()
+```
+
+`OpenWindow` opens a second top-level window on the loop `Run` already drives.
+`formHandler` is a `Handler` of its own and gets what the main window's handler
+gets: frames at the panel's resolution, input, native controls, accessibility,
+damage, the system appearance and the clipboard. Closing the second window leaves
+`Run` running; closing the main window closes it. `ErrNoWindow` before `Run` has
+opened the main window or after it returned; `ErrNotSupported` on a back-end
+without the capability: macOS, Windows and GTK4 (`GO_WIDGETS_GTK=1`) have it; X11,
+Wayland, wasm and Android answer `ErrNotSupported`. Parent/modality is not
+offered.
+
 ## Native dialogs: `OpenFile`, `SaveFile`, `Alert`, `Confirm`
 
 ```go
