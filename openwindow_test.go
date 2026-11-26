@@ -205,6 +205,29 @@ func TestWindowScaleComesFromItsChild(t *testing.T) {
 	}
 }
 
+// clipParent is a main window that also carries an OS clipboard.
+type clipParent struct {
+	*childParent
+	text string
+}
+
+func (c *clipParent) ClipboardText() string        { return c.text }
+func (c *clipParent) SetClipboardText(text string) { c.text = text }
+
+func TestOpenWindowGivesTheHandlerTheClipboard(t *testing.T) {
+	p := &clipParent{childParent: &childParent{fakeWindow: newFakeWindow(true)}}
+	withCurrent(t, p)
+	r := &recorder{}
+	w, err := OpenWindow(WindowConfig{}, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Close()
+	if r.clipboard == nil {
+		t.Fatal("the handler was not given the system clipboard")
+	}
+}
+
 func TestASecondGoodbyeDoesNotPanic(t *testing.T) {
 	w := &Window{stop: make(chan struct{})}
 	calls := 0
