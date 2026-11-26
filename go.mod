@@ -6,7 +6,7 @@ require (
 	github.com/go-macos/objc v0.13.0
 	github.com/go-widgets/toolkit v0.400.0
 	github.com/go-widgets/tray v0.17.0
-	github.com/go-widgets/window v0.110.0
+	github.com/go-widgets/window v0.110.2
 	github.com/godbus/dbus/v5 v5.2.4
 	golang.org/x/sys v0.50.0
 )
