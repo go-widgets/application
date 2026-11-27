@@ -237,7 +237,10 @@ type NativeControlProvider interface {
 
 // Config controls the window.
 type Config struct {
-	Title         string
+	Title string
+
+	// Width and Height are the content size in logical points. A Height of zero
+	// opens the window as tall as the visible screen; any other Height is honoured.
 	Width, Height float64
 
 	// HideOnClose makes the window's own close control hide the window instead of
