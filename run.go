@@ -26,11 +26,17 @@ var visibleScreenHeight = func() (int, bool) {
 	return h, ok
 }
 
-// launchHeight is the window's initial height in logical points: the full
-// visible screen height when the backend can report it — so the app opens as
-// tall as the screen — else the configured fallback (an unknown screen on a
-// headless build, or a backend with no screen query yet).
+// launchHeight is the window's initial height in logical points. A Config.Height
+// the caller set is HONOURED: it used to be replaced by the full screen height
+// whatever the caller asked, so an app that wanted 480 points opened screen-tall.
+// Only an unset height (zero) takes the full visible screen height when the
+// backend can report it, so such an app opens as tall as the screen; on a
+// headless build or a backend with no screen query it stays zero, which lets the
+// platform choose.
 func launchHeight(cfgHeight int) int {
+	if cfgHeight > 0 {
+		return cfgHeight
+	}
 	if h, ok := visibleScreenHeight(); ok && h > 0 {
 		return h
 	}
