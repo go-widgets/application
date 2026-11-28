@@ -145,7 +145,10 @@ if err := application.Raise(); err != nil { /* ErrNoWindow, ErrNotSupported */ }
   off the screen without closing it (`Run` keeps running, the handler keeps its
   state).
 - `Config.HideOnClose` makes the window's own close control hide it instead of
-  ending `Run`; the app then quits through its tray's Quit.
+  ending `Run`; the app then quits through its tray's Quit. On macOS a click on
+  the app's Dock icon while the window is hidden shows and raises it again, as
+  standard apps do (window v0.111.0, `applicationShouldHandleReopen:`); Windows
+  and Linux have no equivalent event for a hidden window.
 - Never a silent no-op: `ErrNoWindow` (before `Run` opened a window or after it
   returned; wraps `window.ErrClosed`) and `ErrNotSupported` (the window package's
   own error) say what could not be done.
